@@ -1,0 +1,9 @@
+﻿"wheelPitchD"= 16mm
+"wheelClearanceD"= 18mm
+"wormPitchD"= 12mm
+"wormClearanceD"= 14mm
+"ShaftD"= 0.25in
+"MountingDistance" = 14mm
+"HubDiameter"= 12mm
+"HubWidth"= 8mm
+"FaceWidth"= 8mm
