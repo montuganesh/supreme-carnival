@@ -1,0 +1,23 @@
+﻿Classes:
+	class.telescope()
+	- Instantiates a telescope object as well as separate objects for the motors and encoders.
+	- All public methods will be part of the telescope class, the other classes for the motors and encoders are mainly for compartmentalization and will ba handled through telescope().
+	
+
+Public Methods:
+	telescope.getAngles(self, type=None)
+	- Returns the current angular position of the telescope as read from the rotary encoders.
+	- Parameters: 
+		type: bool or {‘Az’, ‘Alt’} string, optional, default: None
+		The desired type of angle to be returned; either the azimuthal angle, or altitudinal angle. Boolean values are 0 for azimuthal and 1 for altitudinal. If no type is given, the function will return the tuple (azAngle, altAngle).
+	- Returns:
+		out: tuple or float (might change it to an ndarray from numpy)
+		The azimuthal and/or altitudinal angle of the telescope as read from the encoder(s).
+
+
+	telescope.getAzAngle(self)
+	- Calls telescope.getAngles(self, type=‘Az’)to return the azimuthal angle of the telescope as a float value.
+
+
+	telescope.getPolarAngle(self)
+	- Calls telescope.getAngles(self, type=‘Alt’)to return the altitudinal angle of the telescope as a float value.
