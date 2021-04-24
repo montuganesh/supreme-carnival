@@ -1,7 +1,19 @@
 ﻿Classes:
-	class.telescope()
-	- Instantiates a telescope object as well as separate objects for the motors and encoders.
+	class.Telescope()
+	- Instantiates a Telescope object as well as separate objects for the motors and encoders.
 	- All public methods will be part of the telescope class, the other classes for the motors and encoders are mainly for compartmentalization and will ba handled through telescope().
+	- Class variables:
+		- (Motor) azMotor
+		- (Motor) altMotor
+		- (Encoder) azEncoder
+		- (Encoder) altEncoder
+		- (ndarray) targetAngle
+	
+	class.Motor()
+	- Functionality to send the necessary signals to the controllers to rotate the motors by a precise amount.
+
+	class.Encoder()
+	- Functionality to interpret the I2C signal as an angular reading with respect to some reference angle.
 	
 
 Public Methods:
