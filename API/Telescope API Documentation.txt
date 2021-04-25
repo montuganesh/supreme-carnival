@@ -31,5 +31,5 @@ Public Methods:
 	- Calls telescope.getAngles(self, type=‘Az’)to return the azimuthal angle of the telescope as a float value.
 
 
-	telescope.getPolarAngle(self)
+	telescope.getAltAngle(self)
 	- Calls telescope.getAngles(self, type=‘Alt’)to return the altitudinal angle of the telescope as a float value.
