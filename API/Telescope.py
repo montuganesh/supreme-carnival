@@ -52,4 +52,13 @@ class Telescope():
     def getAltAngle():
         altAngle = Telescope.altEncoder.getAngle()
         return altAngle
+    
+    def calculateDeclination():
+        declination = np.arcsin(np.sin(latitude)*np.sin(altAngle)+np.cos(latitude)*np.cos(altAngle)*np.cos(azAngle))
+    
+    def calculateHourAngle():
+        hourAngle = np.arccos((np.sin(altAngle)-np.sin(latitude)*np.sin(declination)) / (np.cos(latitude)*np.cos(declination)))
+
+    def calculateLocalSiderialTime():
+        LST = hourAngle + rightAscension
         
