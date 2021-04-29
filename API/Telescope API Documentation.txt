@@ -1,4 +1,24 @@
-﻿Classes:
+﻿Collin Here.
+We ned to define how we name stuff, and how things interface. I'm going to make some declerations, and then we 
+can go from there. 
+* Angle Reporting
+** Things that need angular input should take decimal degrees 
+*** Because doing things in degrees, minutes, seconds is not a usual convention for us.
+** Things that output angular information should output in decimal degrees
+*** So there is no conversion stage necessary when that angular output needs to be input somewhere.
+* Latitude/Longitude
+** Both input and output should be in the form of a tuple (LAT,LON)
+** Any variables that hold latitude or longitude info should be named LAT_... or LON_...
+* Programming Conventions
+** Compartmentalize things, people.
+ More files is not a bad thing, and in fact can help with a lot of the integration problems we're about to have.
+ 
+
+
+
+
+
+Classes:
 	class.Telescope()
 	- Instantiates a Telescope object as well as separate objects for the motors and encoders.
 	- All public methods will be part of the telescope class, the other classes for the motors and encoders are mainly for compartmentalization and will ba handled through telescope().
