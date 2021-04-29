@@ -1,5 +1,6 @@
 import numpy as np
-#Make sure all of the inputs are in degrees, not hours.
+#Make sure all of the inputs are in degrees, not hours. 
+#Is this hours of angle? I supose we can build something else if we need to scale. - CB
 def AltAz(RA,DEC,LAT,LON,LST):
     #RA is Right Ascension 
     #DEC is Declination
