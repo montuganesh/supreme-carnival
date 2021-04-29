@@ -33,7 +33,7 @@ def goFindLocation():
     # I'm not entirely happy with this, it's too vulnerable to error. Put it on the re-engineer list. -CB
     LAT_list = []
     LON_list = []
-    for _ciesnso in range(100):
+    for _11 in range(100):
         temphold = getSingleLocation()
         time.sleep(1)
         LAT_list.append(temphold[0])
