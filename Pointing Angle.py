@@ -65,5 +65,3 @@ def getAngleDiff(ALT,AZ,tALT,tAZ):
     altDiff = tALT - ALT
     azDiff = tAZ - AZ
     return altDiff,azDiff
-
-

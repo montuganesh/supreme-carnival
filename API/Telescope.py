@@ -1,5 +1,5 @@
 import numpy as np
-import time
+import time #We're going to want to pull this from somewhere better than time? The GPS module, maybe? Otherwise, we're asking for trouble. We can keep the formatting, though. - CB
 from Motor import Motor  
 from Encoder import Encoder
 
@@ -17,7 +17,7 @@ class Telescope():
     def __init__(self):
         initialAzAngle = self.getAzAngle()
         initialAltAngle = self.getAltAngle()
-        initialAngle = np.array([initialAzAngle, initialAltAngle])
+        initialAngle = np.array([initialAzAngle, initialAltAngle]) # This is a np array for better floating point handling, right? Are you sure we don't want to use arc-time for degree measurement? - CB
         Telescope.targetAngle = initialAngle
         
     
@@ -45,20 +45,22 @@ class Telescope():
         angle = np.array([azAngle, altAngle])
         return angle
     
-    def getAzAngle():
+    def getAzAngle(self):
         azAngle = Telescope.azEncoder.getAngle()
         return azAngle
         
-    def getAltAngle():
+    def getAltAngle(self):
         altAngle = Telescope.altEncoder.getAngle()
         return altAngle
     
-    def calculateDeclination():
+    def calculateDeclination(latitude,altAngle,azAngle):
         declination = np.arcsin(np.sin(latitude)*np.sin(altAngle)+np.cos(latitude)*np.cos(altAngle)*np.cos(azAngle))
-    
-    def calculateHourAngle():
+        return declination
+
+    def calculateHourAngle(altAngle,latitude,declination,):
         hourAngle = np.arccos((np.sin(altAngle)-np.sin(latitude)*np.sin(declination)) / (np.cos(latitude)*np.cos(declination)))
+        return hourAngle
 
     def calculateLocalSiderialTime():
         LST = hourAngle + rightAscension
-        
+        return LST
