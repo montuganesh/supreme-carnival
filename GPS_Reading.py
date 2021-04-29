@@ -1,6 +1,6 @@
 #That may all be unnecessary. https://github.com/MartijnBraam/gpsd-py3 may be a good source for everything
 import gpsd #Make sure this is imported on the RPi
-import time.sleep
+import time
 import statistics #This is an easy way to find the mean of the array, without going to the expense of numpy
 
 #Gets local gps packet every time it's called, should return values as angles
@@ -14,7 +14,7 @@ def init_GPS(lHOST="127.0.0.1",PORT=None,timeout_seconds=360):
     Returns:
         int: 0 for success, -1 for timeout
     """
-    gpsd.connect(host=lHost,port=PORT)
+    gpsd.connect(host=lHOST,port=PORT)
     seconds_count = 0
     while (gpsd.mode != 3):
         time.sleep(1)
@@ -33,13 +33,13 @@ def goFindLocation():
     # I'm not entirely happy with this, it's too vulnerable to error. Put it on the re-engineer list. -CB
     LAT_list = []
     LON_list = []
-    for x in range(100):
+    for _ciesnso in range(100):
         temphold = getSingleLocation()
         time.sleep(1)
         LAT_list.append(temphold[0])
         LON_list.append(temphold[1])
         del temphold
-    return (statistics.median(lat_list),statistics.median(lon_list))
+    return (statistics.median(LAT_list),statistics.median(LON_list))
 
 def getGPStime():
     return gpsd.time_utc()
