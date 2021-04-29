@@ -1,7 +1,11 @@
 import numpy as np
-#Make sure all of the inputs are in degrees, not hours. 
-#Is this hours of angle? I supose we can build something else if we need to scale. - CB
+from astropy.time import Time
+from datetime import datetime
+from datetime import date
+from datetime import time
+#Make sure all of the inputs are in degrees, not hours.
 def AltAz(RA,DEC,LAT,LON,LST):
+    #Use this to compute the Altitude and Azimuth of the celestial object
     #RA is Right Ascension 
     #DEC is Declination
     #LAT is Latitude
@@ -21,6 +25,36 @@ def AltAz(RA,DEC,LAT,LON,LST):
     else:
         AZ = 360-B
     return ALT,AZ
+
+def getJ2000():
+    #a is a placeholder variable
+    a = str(datetime.utcnow())
+    #d is the date and time in a format that the astropy package needs
+    d = a.replace(" ","T",1)
+    t = Time(d,format = 'isot', scale = 'utc')
+    #t.jd returns the current date/time in terms of julian days (days since some date ~6000 years ago)
+    j = t.jd - 2451545.0
+    #to convert to J2000, subtract the number above
+    return j
+
+def getNOW():
+    #used for getting current UTC decimal time, for the getLST function
+    a = str(datetime.now())
+    time = a[11:]
+    hour = float(time[0:2])
+    minute = float(time[3:5])
+    second = float(time[6:])
+    decTime = hour + minute/60 + second/3600
+    return decTime
+
+def getLST(J, LON, NOW):
+    #J is a placeholder variable, use the getJ2000 function for j
+    #LON is Longitude
+    #NOW is the current UTC time.  Make sure that NOW is in decimal hours, use getNOW
+    lst = 100.46 + 0.985647*J + LON + 15*NOW
+    if lst < 0:
+        lst+= 360
+    return lst
 
 def getAngleDiff(ALT,AZ,tALT,tAZ):
     #ALT is Altitude of object
