@@ -29,9 +29,10 @@ def AltAz(RA,DEC,LAT,LON,LST):
         AZ = 360-B
     return ALT,AZ
 
-def getJ2000():
+def getJ2000(dt):
+    #dt is the datetime object we want the J2000 date of
     #a is a placeholder variable
-    a = str(datetime.utcnow())
+    a = str(dt)
     #d is the date and time in a format that the astropy package needs
     d = a.replace(" ","T",1)
     t = Time(d,format = 'isot', scale = 'utc')
@@ -40,11 +41,9 @@ def getJ2000():
     #to convert to J2000, subtract the number above
     return j
 
-#The getNOW function should be obsolete because of the satellite time function.
-
-def getNOW():
-    #used for getting current UTC decimal time, for the getLST function
-    a = str(datetime.now())
+def getTime(dt):
+    #dt is the datetime object we want the decimal time from
+    a = str(dt)
     time = a[11:]
     hour = float(time[0:2])
     minute = float(time[3:5])
@@ -55,7 +54,7 @@ def getNOW():
 def getLST(J, LON, NOW):
     #J is a placeholder variable, use the getJ2000 function for j
     #LON is Longitude
-    #NOW is the current UTC time.  Make sure that NOW is in decimal hours, use getNOW
+    #NOW is the current UTC time.  Make sure that NOW is in decimal hours, use getTime
     lst = 100.46 + 0.985647*J + LON + 15*NOW
     if lst < 0:
         lst+= 360
