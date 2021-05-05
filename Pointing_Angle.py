@@ -51,9 +51,8 @@ def getLST(J, LON, NOW):
     #J is a placeholder variable, use the getJ2000 function for j
     #LON is Longitude
     #NOW is the current UTC time.  Make sure that NOW is in decimal hours, use getNOW
-    lst = 100.46 + 0.985647*J + LON + 15*NOW
-    if lst < 0:
-        lst+= 360
+    lst = 100.46 + 0.985647*J + LON + 15*NOW # Where exactly does this come from
+    lst = lst%360.0 
     return lst
 
 def getAngleDiff(ALT,AZ,tALT,tAZ):
