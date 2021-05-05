@@ -2,6 +2,7 @@ import numpy as np
 import time #We're going to want to pull this from somewhere better than time? The GPS module, maybe? Otherwise, we're asking for trouble. We can keep the formatting, though. - CB
 from Motor import Motor  
 from Encoder import Encoder
+from GPS_API import GPS #This may cause program to hang until GPS is found.
 
 class Telescope():
     

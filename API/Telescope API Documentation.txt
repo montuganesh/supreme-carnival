@@ -12,7 +12,7 @@ can go from there.
 * Programming Conventions
 ** Compartmentalize things, people.
  More files is not a bad thing, and in fact can help with a lot of the integration problems we're about to have.
- 
+
 
 
 
