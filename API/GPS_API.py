@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #THIS CODE IS CURRENTLY UN-DEBUGGED, and cannot be until I can plug a gps module in to test it. This is a major problem
 #Do not rely on this code until it can be checked.
 
@@ -5,12 +6,16 @@ import gpsd #Also make sure this downloads, because if it's not there we're goin
 #That may all be unnecessary. https://github.com/MartijnBraam/gpsd-py3 may be a good source for everything
 import time
 import statistics #This is an easy way to find the mean of the array, without going to the expense of numpy
+import socket
 
 class GPS():
-    def __init__(self,HOST="127.0.0.1",PORT=None,timeout_seconds=360):
+    def __init__(self,HOST="127.0.0.1",PORT=2947,timeout_seconds=360):
         gps_start_code = self.init_GPS(HOST,PORT,timeout_seconds)
-    
-    def init_GPS(self,HOST="127.0.0.1",PORT=None,timeout_seconds=360):
+        self.HOST=HOST
+        self.PORT=PORT
+
+
+    def init_GPS(self,HOST="127.0.0.1",PORT=2947,timeout_seconds=360):
         """Initializes the GPS Moudule with a python library for linux-gpsd.
            Tries until timeout or location is found.
 
@@ -25,6 +30,7 @@ class GPS():
         while (gpsd.mode != 3):
             time.sleep(1)
             seconds_count=seconds_count+1
+            print("A")
             if seconds_count >= timeout_seconds:
                 return -1
         return 0
@@ -48,5 +54,9 @@ class GPS():
     def get_satelite_time(self):
         return gpsd.time_utc()
 
+import socket
 
 
+
+if __name__ == "__main__":
+    g = GPS(HOST='192.168.1.155')
