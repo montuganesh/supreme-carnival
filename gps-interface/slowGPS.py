@@ -10,8 +10,18 @@ class slowGPS:
         self.IP_ADDRESS=IP_ADDRESS
         self.PORT=PORT
     
-    def SG_checkGPSconnection(self):
-        pass
+    def SG_check_GPS_connection(self):
+        while True == True:
+            print("IF INPUT IP/PORT INCORRECT, THIS WILL NEVER STOP.")
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((self.IP_ADDRESS,self.PORT))
+            except:
+                print("""Server not found. Waiting 5 seconds and trying again.""")
+                time.sleep(5)
+                continue
+            break
+        return 0
     
     def SG_getGPSlocationObject(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

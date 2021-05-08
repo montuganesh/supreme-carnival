@@ -2,14 +2,14 @@
 import time
 import datetime
 import calendar
-import socket
+#import socket
 from slowGPS import slowGPS
 
-def set_clock_with_gps(method_used = "phone",
+def set_system_time(method_used = "phone",
                        server_IP="127.0.0.1",
                        server_port=2947):
     if method_used == "phone":
-        check_phone_connection(server_IP, server_port)
+        sGPS = slowGPS(server_IP, server_port)
     elif method_used == "gpsd":
         print("Not currently implemented. Please use phone.")
         return 0
@@ -17,8 +17,8 @@ def set_clock_with_gps(method_used = "phone",
         print("Please chose method.")
         return 0
     
+    sGPS.SG_check_GPS_connection()
     #finds current gps time
-    sGPS = slowGPS(server_IP,server_port)
     gps_timestamp = sGPS.SG_getGPStimestamp()
     # Converts UTC from GPS to unix epoch to set clock
     a = gps_timestamp.timetuple()
@@ -29,7 +29,7 @@ def set_clock_with_gps(method_used = "phone",
     # IT WILL SET YOUR CLOCK. THIS CAUSES MASSIVE INTERNET PROBLEMS.
     # ONLY TEST ON TESTING HARDWARE! 
 
-
+''' Not used here anymore
 def check_phone_connection(server_IP,server_port):
     while True == True:
         try:
@@ -41,7 +41,8 @@ def check_phone_connection(server_IP,server_port):
             continue
         break
     return 0
+'''
 
 if __name__ == "__main__":
-    set_clock_with_gps(method_used="phone",server_IP="192.168.1.155")
+    set_system_time(method_used="phone",server_IP="192.168.1.155")
 

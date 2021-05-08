@@ -1,27 +1,33 @@
 import numpy as np
-import time #We're going to want to pull this from somewhere better than time? The GPS module, maybe? Otherwise, we're asking for trouble. We can keep the formatting, though. - CB
+import time 
 from Motor import Motor  
 from Encoder import Encoder
-from GPS_API import GPS #This may cause program to hang until GPS is found.
+from UNITS_API import UNITS_API
+
+import set_system_time
 
 class Telescope():
-    
+
     # Class variables, these are static variables just in case multiple instances of Telescope are created
     # Otherwise, we may have two instances of azMotor pointing to the same hardware, which would be very bad    
-    
+
     azMotor = Motor()
     altMotor = Motor()
     azEncoder = Encoder()
     altEncoder = Encoder()
     targetAngle = np.array([])
+
+    units_seek = UNITS_API(IP_ADDRESS, PORT)
     
-    def __init__(self):
+    def __init__(self, server_IP, server_port):
+        units_seek = UNITS_API(server_IP, server_port) #Hangs until done - this is deliberate
+
         initialAzAngle = self.getAzAngle()
         initialAltAngle = self.getAltAngle()
         initialAngle = np.array([initialAzAngle, initialAltAngle]) # This is a np array for better floating point handling, right? Are you sure we don't want to use arc-time for degree measurement? - CB
         Telescope.targetAngle = initialAngle
-        
-    
+
+
     def main(self):
         # Calls on the motors to rotate the telescope to point at the current Telescope.targetAngle
         # Will also include safety features like a constraint test to make sure the target angle is within hardware capabilities
