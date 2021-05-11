@@ -3,6 +3,7 @@ import time
 from Motor import Motor  
 from Encoder import Encoder
 from UNITS_API import UNITS_API
+from Hardware_Config import azMotorCfg, altMotorCfg
 
 import set_system_time
 

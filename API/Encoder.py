@@ -4,6 +4,7 @@ class Encoder():
     
     def __init__(self):
         
+        
         # All the I2C stuff and pin connections information here
         return
         
