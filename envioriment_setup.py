@@ -13,7 +13,8 @@ packages_to_import = [
     'statistics'
     'gpsd-py3' #This needs citation
     'pynmea2' #This needs citation
-]
+    'pigpio'
+    ]
 
 #Should I create a virtual envioriment for all of this? GPSD feels like a binding that should go
 #in it's own special place. But on the other hand, this will probably use a
