@@ -12,7 +12,6 @@ class Motor():
     CCW = 1
     CW = -1
     
-    
     def __init__(self, cfg):
         self.PUL = cfg['PUL']
         self.DIR = cfg['DIR']
@@ -128,10 +127,11 @@ class Motor():
         return wid
     
     
-    def transmit_waveIDs(self, wid, all_steps):   
+    def transmit_waveIDs(self, wid, all_steps):
         # Generate a chain of waves
         
         length = len(all_steps)
+        length_is_odd = length % 2 == 1
         
         '''
         Multichaining seems like a very bad idea but in testing it works quite well
@@ -142,24 +142,39 @@ class Motor():
         but these may present mechanical acceleration issues
         '''
         
-        chain1, chain2 = [], []
+        chain_up, chain_down, chain_max = [], [], []
         
         for i in range(length):
             steps = all_steps[i]
             x = steps & 255
-            y = (steps >> 8) & 255
+            y = steps >> 8
             
-            if i < length/2:
-                chain1 += [255, 0, wid[i], 255, 1, x, y]
+            if length_is_odd and i == int(length/2):
+                mod = y >> 8
+                rem = y & 255
+                
+                # This part handles very long chains >= 2^16 steps.
+                # Should be able to handle up to 2^32 steps in one go (way more than necessary)
+                chain_max += [255, 0, 255, 0, wid[i], 255, 1, 255, 255, 255, 1, mod, 0]
+                chain_max += [255, 0, wid[i], 255, 1, x + mod, rem]
+                
+            elif i < length/2:
+                chain_up += [255, 0, wid[i], 255, 1, x, y]
             else:
-                chain2 += [255, 0, wid[i], 255, 1, x, y]
-    
-        Motor.pi.wave_chain(chain1)  # Transmit chain1
+                chain_down += [255, 0, wid[i], 255, 1, x, y]
+                
+                
+        Motor.pi.wave_chain(chain_up)
+        self.sleep_until_transmitted()
         
-        # It's gross but it gets the job done
+        Motor.pi.wave_chain(chain_max)
+        self.sleep_until_transmitted()
+            
+        Motor.pi.wave_chain(chain_down)
+        
+        
+    def sleep_until_transmitted(self):
+        
         while Motor.pi.wave_tx_busy():
             sleep(0.001)
-            
-        Motor.pi.wave_chain(chain2) # Transmit chain2
-        
         
