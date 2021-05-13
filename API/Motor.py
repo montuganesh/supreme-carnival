@@ -1,18 +1,16 @@
 import numpy as np
+from time import sleep
 import pigpio
+
 
 class Motor():
     
-    PUL = 0
-    DIR = 0
-    MCSTP = 0
-    MXSPD = 0 # Seems to be capped at 1 kHz for now, theoretical limit is 100 kHz.
-    MXACC = 0
-    PWMCLOCKS = None
+    # Maybe the pi should be a static variable of the Telescope?
     pi = pigpio.pi()
-    max_PWM_frequency = 0
-    allowed_PWM_frequencies = np.array([])
-    max_speed = 0 # Degrees per second
+    
+    # Positive degree rotations correspond to counter-clockwise motor rotation
+    CCW = 1
+    CW = -1
     
     
     def __init__(self, cfg):
@@ -30,17 +28,39 @@ class Motor():
             self.max_PWM_frequency = self.allowed_PWM_frequencies[(self.allowed_PWM_frequencies-self.max_PWM_frequency).argmin()]      
         
         self.max_speed = self.max_PWM_frequency / self.MCSTP * 360
+        Motor.pi.set_mode(self.PUL, pigpio.OUTPUT)
+        Motor.pi.set_mode(self.DIR, pigpio.OUTPUT)
         
     
     def actuate(self, degrees):
-        # Degress: + for CCW, - for CW
-        # Main actuation function
+        # Sets the dirction
+        if degrees* Motor.CCW >= 0:
+            Motor.pi.write(self.DIR, 1)
+        else: 
+            Motor.pi.write(self.DIR, 0)
+        
+        # Ensures the direction change takes effect before sending pulses to the motor
+        sleep(0.001)    
+        
+        steps = abs(degrees) / 360 * self.MCSTP
+        
+        waveform = self.create_waveform(steps)
+        frequencies = [item[0] for item in waveform]
+        all_steps = [item[1] for item in waveform]
+        
+        wid = self.generate_waveIDs(frequencies)
+        
+        # ****
+        self.transmit_waveIDs(wid, all_steps)
+        # ****
+        
+        # Probably returns wid and steps to Telescope for dual actuation
         return
         
     
     def create_waveform(self, steps):
         # Decides on the best waveform for the job, sends it to the generate function
-        steps_left = steps
+        steps_left = int(steps)
         ramp_up = []        
         ramp_down = []
         
@@ -87,33 +107,59 @@ class Motor():
         return waveform
     
     
-    def generate_waveform(self, waveform_instructions):
+    def generate_waveIDs(self, frequencies):
         """Generates a composite waveform.
         waveform_instructions:  List of [Frequency, Steps]
         """
-        self.pi.wave_clear()     # clear existing waves
-        length = len(waveform_instructions)  # number of ramp levels
+        Motor.pi.wave_clear()     # clear existing waves -- bump to Telescope
+        length = len(frequencies)  # number of ramp levels
         wid = [-1] * length
-    
+        
         # Generate a wave per ramp level
         for i in range(length):
-            frequency = waveform_instructions[i][0]
+            frequency = frequencies[i]
             micros = int(500000 / frequency)
             wf = []
             wf.append(pigpio.pulse(1 << self.PUL, 0, micros))  # pulse on
             wf.append(pigpio.pulse(0, 1 << self.PUL, micros))  # pulse off
-            self.pi.wave_add_generic(wf)
-            wid[i] = self.pi.wave_create()
+            Motor.pi.wave_add_generic(wf)
+            wid[i] = Motor.pi.wave_create()
+        
+        return wid
     
+    
+    def transmit_waveIDs(self, wid, all_steps):   
         # Generate a chain of waves
-        # Handle this in a separate function to transimit the wave to hardware
-        chain = []
+        
+        length = len(all_steps)
+        
+        '''
+        Multichaining seems like a very bad idea but in testing it works quite well
+        Single chains can only run up to 20 individual loops but in many cases length>20
+        At a max speed of 1800 deg/sec we need at least 2 chains to rotate 729 times
+        so only two chains are implemented here
+        Other solutions involve limiting further the number of discrete frequency levels for ramping
+        but these may present mechanical acceleration issues
+        '''
+        
+        chain1, chain2 = [], []
+        
         for i in range(length):
-            steps = waveform_instructions[i][1]
+            steps = all_steps[i]
             x = steps & 255
-            y = steps >> 8
-            chain += [255, 0, wid[i], 255, 1, x, y]
+            y = (steps >> 8) & 255
+            
+            if i < length/2:
+                chain1 += [255, 0, wid[i], 255, 1, x, y]
+            else:
+                chain2 += [255, 0, wid[i], 255, 1, x, y]
     
-        self.pi.wave_chain(chain)  # Transmit chain.
+        Motor.pi.wave_chain(chain1)  # Transmit chain1
+        
+        # It's gross but it gets the job done
+        while Motor.pi.wave_tx_busy():
+            sleep(0.001)
+            
+        Motor.pi.wave_chain(chain2) # Transmit chain2
         
         
