@@ -8,11 +8,12 @@ class Motor():
     # Maybe the pi should be a static variable of the Telescope?
     pi = pigpio.pi()
     
-    # Positive degree rotations correspond to counter-clockwise motor rotation
+    # Positive degrees correspond to counter-clockwise motor rotation
+    # Could put this in Hardware_Config if we would prefer different conventions for each motor
     CCW = 1
     CW = -1
     
-    def __init__(self, cfg):
+    def __init__(self, cfg, pi=None):
         self.PUL = cfg['PUL']
         self.DIR = cfg['DIR']
         self.PWMCLOCKS = np.array(cfg['PWMCLOCKS'])
@@ -30,8 +31,19 @@ class Motor():
         Motor.pi.set_mode(self.PUL, pigpio.OUTPUT)
         Motor.pi.set_mode(self.DIR, pigpio.OUTPUT)
         
-    
+        if pi is not None:
+            self.pi=pi
+        
+        
+    # Will only actuate one motor 
     def actuate(self, degrees):
+        
+        wid, all_steps = self.setup_actuation(degrees)
+        
+        self.transmit_waveIDs(wid, all_steps)
+        
+    
+    def setup_actuation(self, degrees):
         # Sets the dirction
         if degrees* Motor.CCW >= 0:
             Motor.pi.write(self.DIR, 1)
@@ -49,12 +61,7 @@ class Motor():
         
         wid = self.generate_waveIDs(frequencies)
         
-        # ****
-        self.transmit_waveIDs(wid, all_steps)
-        # ****
-        
-        # Probably returns wid and steps to Telescope for dual actuation
-        return
+        return wid, all_steps
         
     
     def create_waveform(self, steps):
@@ -163,18 +170,25 @@ class Motor():
             else:
                 chain_down += [255, 0, wid[i], 255, 1, x, y]
                 
-                
+        
         Motor.pi.wave_chain(chain_up)
-        self.sleep_until_transmitted()
+        self.sleep_while_tx()
         
         Motor.pi.wave_chain(chain_max)
-        self.sleep_until_transmitted()
+        self.sleep_while_tx()
             
         Motor.pi.wave_chain(chain_down)
+        self.sleep_while_tx()
+        
+        self.cancel()
         
         
-    def sleep_until_transmitted(self):
+    def sleep_while_tx(self):
         
         while Motor.pi.wave_tx_busy():
             sleep(0.001)
         
+    def cancel(self):
+        
+        self.pi.wave_tx_stop()
+        self.pi.wave_clear()
