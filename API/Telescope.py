@@ -43,6 +43,7 @@ class Telescope():
         dAngle = np.asarray(angle) - Telescope.currentAngle
         self.actuate(dAngle)
         
+        
     # Relative angle is passed in
     def actuate(self, dAngle):
         # Calls on the motors to rotate the telescope to point at the current Telescope.targetAngle
@@ -79,8 +80,33 @@ class Telescope():
         az_min, az_max = -180, 180          # Really up to Collin based on the design. I say we keep within one revolution to simplify the encoder's job
         alt_min, alt_max = 0, 90            # Spherical polar coordinates constraints
         
-        # Debug
-        return True
+        d_alt = dAngle[Telescope.alt]
+        d_az = dAngle[Telescope.az]
+        
+        next_alt = d_alt + Telescope.currentAngle[Telescope.alt]
+        next_az = d_az + Telescope.currentAngle[Telescope.az]
+        
+        d_az_good, d_alt_good, az_good, alt_good = False, False, False, False
+        
+        if d_az > d_az_min and d_az < d_az_max:
+            d_az_good = True
+        else:
+            print(f"Input change in azimuthal angle is not within constraints, must be within [{d_az_min}, {d_alt_min}]")
+        if d_alt > d_alt_min and d_alt < d_alt_max:
+            d_alt_good = True
+        else:
+            print(f"Input change in altitudinal angle is not within constraints, must be within [{d_alt_min}, {d_alt_max}]")
+        if  next_az > az_min and next_az < az_max:
+            az_good = True
+        else:
+            print(f"Azimuthal angle after execution will not be within constraints, must be within [{az_min}, {alt_min}]")
+        if next_alt > alt_min and next_alt <alt_max:
+            alt_good = True
+        else:
+            print(f"Altitudinal angle after execution will not be within constraints, must be within [{alt_min}, {alt_max}]")
+
+        return d_az_good and d_alt_good and az_good and alt_good
+
         
         
     def getAngles(self):
