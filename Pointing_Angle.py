@@ -3,37 +3,32 @@ from astropy.time import Time
 from datetime import datetime
 from datetime import date
 from datetime import time
-from astropy import coordinates as coord
-#Make sure all of the inputs are in (decimal) degrees, not hours.
-def getAltAz(RA,DEC,LAT,LON,LST):
+#Make sure all of the inputs are in degrees, not hours.
+def AltAz(RA,DEC,LAT,LON,LST):
     #Use this to compute the Altitude and Azimuth of the celestial object
     #RA is Right Ascension 
     #DEC is Declination
     #LAT is Latitude
     #LON is Longitude
     #LST is Local Sideral Time
-    HA = LST-RA
+    HA = RA-LST
     #HA is Hour Angle
     if HA < 0:
         HA +=360
-    A = np.sin(np.radians(DEC))*np.sin(np.radians(LAT))+np.cos(np.radians(DEC))*np.cos(np.radians(LAT))*np.cos(np.radians(HA))
-    ALT = np.degrees(np.arcsin(A))
+    A = np.sin(DEC)*np.sin(LAT)+np.cos(DEC)*np.cos(LAT)*np.cos(HA)
+    ALT = np.arcsin(A)
     #Final Altitude
-    B = np.degrees(np.arccos((np.sin(np.radians(DEC))-np.sin(np.radians(ALT))*np.sin(np.radians(LAT)))/(np.cos(np.radians(ALT))*np.cos(np.radians(LAT)))))
-    print(B)
-    print(np.sin(np.radians(HA)))
-    print(HA)
+    B = (np.sin(DEC)-np.sin(ALT)*np.sin(LAT))/(np.cos(ALT)*np.cos(LAT))
     AZ = 0
-    if np.sin(np.radians(HA)) < 0:
+    if np.sin(HA) < 0:
         AZ = B
     else:
         AZ = 360-B
     return ALT,AZ
 
-def getJ2000(dt):
-    #dt is the datetime object we want the J2000 date of
+def getJ2000():
     #a is a placeholder variable
-    a = str(dt)
+    a = str(datetime.utcnow())
     #d is the date and time in a format that the astropy package needs
     d = a.replace(" ","T",1)
     t = Time(d,format = 'isot', scale = 'utc')
@@ -42,9 +37,9 @@ def getJ2000(dt):
     #to convert to J2000, subtract the number above
     return j
 
-def getTime(dt):
-    #dt is the datetime object we want the decimal time from
-    a = str(dt)
+def getNOW():
+    #used for getting current UTC decimal time, for the getLST function
+    a = str(datetime.now())
     time = a[11:]
     hour = float(time[0:2])
     minute = float(time[3:5])
@@ -55,10 +50,9 @@ def getTime(dt):
 def getLST(J, LON, NOW):
     #J is a placeholder variable, use the getJ2000 function for j
     #LON is Longitude
-    #NOW is the current UTC time.  Make sure that NOW is in decimal hours, use getTime
-    lst = 100.46 + 0.985647*J + LON + 15*NOW
-    if lst < 0:
-        lst+= 360
+    #NOW is the current UTC time.  Make sure that NOW is in decimal hours, use getNOW
+    lst = 100.46 + 0.985647*J + LON + 15*NOW # Where exactly does this come from
+    lst = lst%360.0 
     return lst
 
 def getAngleDiff(ALT,AZ,tALT,tAZ):
@@ -70,32 +64,3 @@ def getAngleDiff(ALT,AZ,tALT,tAZ):
     altDiff = tALT - ALT
     azDiff = tAZ - AZ
     return altDiff,azDiff
-
-def getRA(name):
-    c = coord.SkyCoord.from_name(name, frame='icrs')
-    #The above line returns some high-level object containing the information we want
-    d = c.to_string('decimal')
-    #The .to_string() method for this object returns the right ascension and declination, separated by a space
-    e = d.split()
-    #The .split() separates the string into a list, using spaces as the points of separation
-    RA = e[0]
-    #Since right ascension is the first value listed from the .to_string() method, it is the first item in the list
-    return RA
-
-def getDEC(name):
-    c = coord.SkyCoord.from_name(name, frame='icrs')
-    d = c.to_string('decimal')
-    e = d.split()
-    DEC = e[1]
-    #Since declination is the second value listed from the .to_string() method, it is the second item in the list
-    return DEC
-
-def calcAngle(name,LAT,LON,dt,tALT,tAZ):
-    RA = getRA(name)
-    DEC = getDEC(name)
-    J2000 = getJ2000(dt)
-    LST = getLST(J2000,LON,dt)
-    ALT,AZ = getAltAz(RA,DEC,LAT,LON,LST)
-    diff = getAngleDiff(ALT,AZ,tALT,tAZ)
-    return diff
-
