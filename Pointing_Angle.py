@@ -3,8 +3,9 @@ from astropy.time import Time
 from datetime import datetime
 from datetime import date
 from datetime import time
+from astropy import coordinates as coord
 #Make sure all of the inputs are in (decimal) degrees, not hours.
-def AltAz(RA,DEC,LAT,LON,LST):
+def getAltAz(RA,DEC,LAT,LON,LST):
     #Use this to compute the Altitude and Azimuth of the celestial object
     #RA is Right Ascension 
     #DEC is Declination
@@ -69,3 +70,32 @@ def getAngleDiff(ALT,AZ,tALT,tAZ):
     altDiff = tALT - ALT
     azDiff = tAZ - AZ
     return altDiff,azDiff
+
+def getRA(name):
+    c = coord.SkyCoord.from_name(name, frame='icrs')
+    #The above line returns some high-level object containing the information we want
+    d = c.to_string('decimal')
+    #The .to_string() method for this object returns the right ascension and declination, separated by a space
+    e = d.split()
+    #The .split() separates the string into a list, using spaces as the points of separation
+    RA = e[0]
+    #Since right ascension is the first value listed from the .to_string() method, it is the first item in the list
+    return RA
+
+def getDEC(name):
+    c = coord.SkyCoord.from_name(name, frame='icrs')
+    d = c.to_string('decimal')
+    e = d.split()
+    DEC = e[1]
+    #Since declination is the second value listed from the .to_string() method, it is the second item in the list
+    return DEC
+
+def calcAngle(name,LAT,LON,dt,tALT,tAZ):
+    RA = getRA(name)
+    DEC = getDEC(name)
+    J2000 = getJ2000(dt)
+    LST = getLST(J2000,LON,dt)
+    ALT,AZ = getAltAz(RA,DEC,LAT,LON,LST)
+    diff = getAngleDiff(ALT,AZ,tALT,tAZ)
+    return diff
+
