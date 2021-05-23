@@ -185,17 +185,3 @@ class Telescope():
     def shutdown(self):
         Telescope.pi.stop()
         sys.exit(0)
-    
-    
-    # Can this be moved somewhere where it can interact with the GPS? I don't want this in the Telescope class itself
-    def calculateDeclination(latitude,altAngle,azAngle):
-        declination = np.arcsin(np.sin(latitude)*np.sin(altAngle)+np.cos(latitude)*np.cos(altAngle)*np.cos(azAngle))
-        return declination
-
-    def calculateHourAngle(altAngle,latitude,declination,):
-        hourAngle = np.arccos((np.sin(altAngle)-np.sin(latitude)*np.sin(declination)) / (np.cos(latitude)*np.cos(declination)))
-        return hourAngle
-
-    def calculateLocalSiderialTime():
-        LST = hourAngle + rightAscension
-        return LST
