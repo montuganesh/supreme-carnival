@@ -14,20 +14,21 @@ can go from there.
  More files is not a bad thing, and in fact can help with a lot of the integration problems we're about to have.
 
 
-
-
-
-
 Classes:
-	class.Telescope()
+	class.Telescope(server_IP, server_port)
 	- Instantiates a Telescope object as well as separate objects for the motors and encoders.
-	- All public methods will be part of the telescope class, the other classes for the motors and encoders are mainly for compartmentalization and will ba handled through telescope().
+	Parameters: server_IP, server_port
+	- All public methods will be part of the telescope class, the other classes for the motors and encoders are mainly for compartmentalization and will ba handled through Telescope().
 	- Class variables:
+		- (pigpio.PI) pi
 		- (Motor) azMotor
 		- (Motor) altMotor
 		- (Encoder) azEncoder
 		- (Encoder) altEncoder
-		- (ndarray) targetAngle
+		- (int) gearRatio
+		- (ndarray) currentAngle
+		- (float) LAT, LON
+		- (UNITS_API) gps
 	
 	class.Motor()
 	- Functionality to send the necessary signals to the controllers to rotate the motors by a precise amount.
@@ -37,19 +38,84 @@ Classes:
 	
 
 Public Methods:
-	telescope.getAngles(self, type=None)
+	
+	Telescope.target(self, angle)
+	- Actuates the telescope to the specified (absolute) angle by calling Telescope.actuate.
+	Parameters: (ndarray) angle
+
+	Telescope.actuate(self, dAngle)
+	- Actuates the telescope to the specified (relative) angle and checks whether the specified actuation angle is safe to perform.
+	- If the actuation angle is not safe to perform, an error statement will be printed and the telescope will not actuate.
+	Parameters: (ndarray) dAngle
+
+	Telescope.activeTrack(self, angleFunc, timeDelta=10, trackTime=None, **kwargs)
+	- Actuates the telescope using Telescope.actuate by the specified (relative) angle returned by angleFunc. 
+	- Continues doing this every timeDelta for a total time of trackTime, or until user override.
+	Parameters:
+		- (function) angleFunc: An outside function that returns the relative angle the telescope needs to travel during runtime.
+					This function must return an ndarray of the form [alt, az] for the relative angle.
+					Can take in any number of parameters, which must be specified in kwargs.
+
+		- (float) timeDelta: 	Minimum time in seconds between sucessive calls of angleFunc and attempts to actuate the motors.
+		       (default 10) 	The time betweeen actuation events can (and will often be) much longer than this time since the motors
+				     	take a long time to actuate, but the time between actuation events will never be smaller than timeDelta.
+
+		- (float) trackTime: 	Total time in seconds to spend tracking the object. If None, object will be tracked indefinitely, or until
+		     (default None)	user override (via keyboard interrupt).
+
+		- (dict) kwargs:	Dictionary holding the arguments to be passed into angleFunc at runtime. Dictionary keys must be identical to
+					the name of the variable angleFunc takes in, and the value must be either:
+						1) A value defined outside the telescope class, in which case the value is simply that variable name
+						2) A value defined inside the telescope class, in which case the value is an instance of the 'getter'
+						   function within the Telescope class. This function will be called during runtime in the Telescope
+						   class to provide a constantly updating variable.
+
+	- An example of the usage of kwargs and this Telescope.activeTrack in general is provided at the end.
+
+
+	Telescope.getAngles(self)
 	- Returns the current angular position of the telescope as read from the rotary encoders.
-	- Parameters: 
-		type: bool or {‘Az’, ‘Alt’} string, optional, default: None
-		The desired type of angle to be returned; either the azimuthal angle, or altitudinal angle. Boolean values are 0 for azimuthal and 1 for altitudinal. If no type is given, the function will return the tuple (azAngle, altAngle).
 	- Returns:
-		out: tuple or float (might change it to an ndarray from numpy)
-		The azimuthal and/or altitudinal angle of the telescope as read from the encoder(s).
+		out: ndarray
+		The angle of the telescope as read from the encoder in [alt, az] form.
+
+	Telescope.getAzAngle(self)
+	- Returns the azimuthal angle as a float.
 
 
-	telescope.getAzAngle(self)
-	- Calls telescope.getAngles(self, type=‘Az’)to return the azimuthal angle of the telescope as a float value.
+	Telescope.getAltAngle(self)
+	- Returns the altitudinal angle as a float.
+
+	Telescope.getLAT(self):
+	- Returns the telescope's latitude as a float (initialized by the gps upon instantiation).
+
+	Telescope.getLON(self):
+	- Returns the telescope's longditude as a float (initialized by the gps upon instantiation).
+
+	Telescope.shutdown(self):
+	- Gracefully exits the program
 
 
-	telescope.getAltAngle(self)
-	- Calls telescope.getAngles(self, type=‘Alt’)to return the altitudinal angle of the telescope as a float value.
+=============================================Example=============================================
+from Telescope import *				
+def simpleTrack(bodyName, currentAngle):
+	dAngle = calcAngleDiff(bodyName, *currentAngle) # calcAngleDiff is a pseudocode function
+	return dAngle 
+					
+params = {
+'bodyName': 'moon',			# Example of a value defined outside Telescope
+'currentAngle': Telescope.getAngles,	# Example of a value defined inside Telescope
+}
+
+telescope = Telescope()
+telescope.activeTrack(angleFunc=simpleTrack, **kwargs=**params)
+telescope.shutdown()
+					
+# The telescope will track the object with the name 'moon' until user override according to
+# simpleTrack, then the telescope will shutdown.
+
+===========================================End Example===========================================
+
+
+
+
