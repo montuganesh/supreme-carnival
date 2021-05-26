@@ -78,7 +78,7 @@ def getRA(name):
     #The .to_string() method for this object returns the right ascension and declination, separated by a space
     e = d.split()
     #The .split() separates the string into a list, using spaces as the points of separation
-    RA = e[0]
+    RA = float(e[0])
     #Since right ascension is the first value listed from the .to_string() method, it is the first item in the list
     return RA
 
@@ -86,7 +86,7 @@ def getDEC(name):
     c = coord.SkyCoord.from_name(name, frame='icrs')
     d = c.to_string('decimal')
     e = d.split()
-    DEC = e[1]
+    DEC = float(e[1])
     #Since declination is the second value listed from the .to_string() method, it is the second item in the list
     return DEC
 
@@ -94,7 +94,8 @@ def calcAngle(name,LAT,LON,dt,tALT,tAZ):
     RA = getRA(name)
     DEC = getDEC(name)
     J2000 = getJ2000(dt)
-    LST = getLST(J2000,LON,dt)
+    NOW = getTime(dt)
+    LST = getLST(J2000,LON,NOW)
     ALT,AZ = getAltAz(RA,DEC,LAT,LON,LST)
     diff = getAngleDiff(ALT,AZ,tALT,tAZ)
     return diff
