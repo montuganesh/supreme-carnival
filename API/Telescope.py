@@ -6,9 +6,10 @@ from Encoder import Encoder
 # from UNITS_API import UNITS_API as GPS
 from Hardware_Config import azMotorCfg, altMotorCfg
 import pigpio
+from datetime import datetime
 
 # import set_system_time
-
+    
 class Telescope():
 
     # Class variables, these are static variables just in case multiple instances of Telescope are created
@@ -33,11 +34,10 @@ class Telescope():
         
         #Telescope.LAT, Telescope.LON = Telescope.gps.getLocation()
 
-        initialAzAngle = self.getAzAngle()
-        initialAltAngle = self.getAltAngle()
+        initialAzAngle = Telescope.getAzAngle()
+        initialAltAngle = Telescope.getAltAngle()
         initialAngle = np.array([initialAltAngle, initialAzAngle])
         Telescope.currentAngle = initialAngle
-
 
     # Absolute target angle is passed in
     def target(self, angle):
@@ -50,14 +50,22 @@ class Telescope():
         
         constraints_passed = self.checkConstraints(dAngle)
         
+        correction = 0
+        
         if constraints_passed: 
             try:
                 alt_actuation_angle = dAngle[Telescope.alt]*Telescope.gearRatio
                 az_actuation_angle = dAngle[Telescope.az]*Telescope.gearRatio
                 print(f"Alt: {alt_actuation_angle}")
                 print(f"Az: {az_actuation_angle}")
-                Telescope.altMotor.actuate(alt_actuation_angle)
-                Telescope.azMotor.actuate(az_actuation_angle)
+                # Telescope.altMotor.actuate(alt_actuation_angle)
+                # Telescope.azMotor.actuate(az_actuation_angle)
+                newAngle = Telescope.currentAngle + dAngle
+                # Sleeps to let the encoders catch up
+                time.sleep(0.2)
+                Telescope.currentAngle = Telescope.getAngles()
+                correction = newAngle - Telescope.currentAngle
+                self.correct(correction)
                 
             except KeyboardInterrupt:
                 Telescope.altMotor.cancel()
@@ -65,8 +73,9 @@ class Telescope():
         else:
             print("Target angle outside of physical constraints... \nCommand was aborted")
             
+            
     
-    def activeTrack(self, angleFunc, timeDelta=1, trackTime=None, **kwargs):
+    def activeTrack(self, angleFunc, timeDelta=10, trackTime=None, **kwargs):
         # Begins a loop over either a certain trackTime (float) or until user override (None)
         # kwargs takes in a  dictionary of arguments for angleFunc. 
         # If angleFunc requires information from the telescope at runtime (runtime variables),
@@ -83,27 +92,24 @@ class Telescope():
         except TypeError:
             endTime = None
             
-        
         keepRunning = True        
         
         try:
             # Main Loop
             while keepRunning:
                 now = time.time()
-                
-                # Sleeps until sufficient time has passed
-                while time.time() - now < timeDelta:
-                    # We really don't need a high sleep resolution, might increase this value significantly
-                    time.sleep(0.1)
                         
                 # Handles runtime variables in kwargs
                 for key in kwargs:
                     if callable(kwargs[key]):
-                        kwargs[key] = self.kwargs[key]()
+                        kwargs[key] = kwargs[key]()
                 
                 # Call angleFunc which returns angle difference as [alt, az], then actuate.
                 dAngle = angleFunc(**kwargs)
                 self.actuate(dAngle)
+                
+                
+                time.sleep(timeDelta - (time.time() - now))
                 
                 
                 if not trackTime:
@@ -115,8 +121,10 @@ class Telescope():
             Telescope.altMotor.cancel()
             Telescope.azMotor.cancel()
             print("Keyboard interrupt...")
+            trackTime = None
         
         print("Active tracking terminated")
+        return trackTime
 
             
     def checkConstraints(self, dAngle):        
@@ -125,7 +133,7 @@ class Telescope():
         d_alt_min, d_alt_max = -90, 90
         
         # Limitations on absolute actuation
-        az_min, az_max = 0, 360             # Really up to Collin based on the design. I say we keep within one revolution to simplify the encoder's job
+        az_min, az_max = 0, 360             # Keep within one revolution to simplify the encoder's job
         alt_min, alt_max = 0, 90            # Spherical polar coordinates constraints (0 to 90 or 90 to 0?)
         
         d_alt = dAngle[Telescope.alt]
@@ -154,29 +162,43 @@ class Telescope():
             print(f"Altitudinal angle after execution will not be within constraints, must be within [{alt_min}, {alt_max}]")
 
         return d_az_good and d_alt_good and az_good and alt_good
+    
+    
+    def correct(self, correction):
+        # 30 arc seconds may be too ambitious, needs testing
+        threshold_arc_seconds = 30
+        threshold_ddeg = threshold_arc_seconds/3600.0 
+        if correction.all() <= threshold_ddeg:
+            return
+        else:
+            print("Skipped steps. Correcting...")
+            self.actuate(correction)
 
         
+    def getCurrentTime():
+        time = datetime.now()
+        return time
         
-    def getAngles(self):
-        azAngle = self.getAzAngle()
-        altAngle = self.getAltAngle()
+    def getAngles():
+        azAngle = Telescope.getAzAngle()
+        altAngle = Telescope.getAltAngle()
         angle = np.array([azAngle, altAngle])
         return angle
     
-    def getAzAngle(self):
+    def getAzAngle():
         azAngle = Telescope.azEncoder.getAngle()
         #return azAngle
         return 170
         
-    def getAltAngle(self):
+    def getAltAngle():
         altAngle = Telescope.altEncoder.getAngle()
         #return altAngle
         return 50
     
-    def getLAT(self):
+    def getLAT():
         return Telescope.LAT
     
-    def getLON(self):
+    def getLON():
         return Telescope.LON
     
     def getGearRatio(self):

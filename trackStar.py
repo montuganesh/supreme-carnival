@@ -1,8 +1,12 @@
+# To be tested on pi
+# from subprocess import run
+# rc = run("sudo pigpiod -t 0", shell=True)
+# print(rc)
+
 from Telescope import Telescope
 from basicTrack import basicTrack as angleFunc
 from Pointing_Angle import getRA
 from astropy.coordinates.name_resolve import NameResolveError
-from datetime import datetime
 
 print('Initializing...')
 
@@ -13,7 +17,7 @@ name = input('Input name of celestial body to be tracked: ')
 while True:
     try:
         getRA(name)
-        print("Located! Beginning tracking...")
+        print("Located!")
         break
     except NameResolveError:
         print("Input name could not be resolved")
@@ -24,11 +28,13 @@ trackParams = {
     'bodyName': name,
     'LAT': Telescope.getLAT,
     'LON': Telescope.getLON,
-    'currentTimeDt': datetime.now(), #Telescope.getCurrentTime,
+    'currentTimeDt': Telescope.getCurrentTime,
     'currentAngle': Telescope.getAngles
     }
 
-terminateType = telescope.activeTrack(angleFunc, 5, 20, **trackParams)
+trackTime = float(input("How long would you like to track for (seconds)? "))
+
+terminateType = telescope.activeTrack(angleFunc, 5, trackTime, **trackParams)
 
 if terminateType:
     print("Tracking terminated (timeout)")
@@ -36,3 +42,4 @@ else:
     print("Tracking terminated (user interrupt)")
     
 telescope.shutdown()
+print('Shutdown')
