@@ -1,5 +1,3 @@
-# import sys
-# sys.path.insert(1, 'API')
 import Motor
 from Hardware_Config import azMotorCfg as az_cfg
 from Hardware_Config import altMotorCfg as alt_cfg

@@ -1,9 +1,15 @@
-# To be tested on pi
-# from subprocess import run
-# rc = run("sudo pigpiod -t 0", shell=True)
-# print(rc)
+import subprocess
+cmd = "sudo pigpiod -t 0"
+subprocess.Popen(cmd, stdout = subprocess.PIPE)
 
-from Telescope import Telescope
+try:
+    from Telescope import Telescope
+except ModuleNotFoundError:
+    from sys import path
+    apiPath = path[0] + '/API'
+    path.insert(1,apiPath)
+    from Telescope import Telescope
+    
 from basicTrack import basicTrack as angleFunc
 from Pointing_Angle import getRA
 from astropy.coordinates.name_resolve import NameResolveError
