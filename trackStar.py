@@ -1,23 +1,15 @@
 import subprocess
-cmd = "sudo pigpiod -t 0"
-subprocess.Popen(cmd, stdout = subprocess.PIPE)
+init_pigpio = ["sudo", "pigpiod", "-t0"]
+subprocess.Popen(init_pigpio, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
 
-try:
-    from Telescope import Telescope
-except ModuleNotFoundError:
-    from sys import path
-    apiPath = path[0] + '/API'
-    path.insert(1,apiPath)
-    from Telescope import Telescope
-    
+print("Initializing...")
+from Telescope import Telescope
 from basicTrack import basicTrack as angleFunc
 from Pointing_Angle import getRA
 from astropy.coordinates.name_resolve import NameResolveError
 
-print('Initializing...')
-
 # Server IP and port placeholders
-telescope = Telescope(1,1) 
+telescope = Telescope(1,1)
 
 name = input('Input name of celestial body to be tracked: ')
 while True:
@@ -46,6 +38,6 @@ if terminateType:
     print("Tracking terminated (timeout)")
 else:
     print("Tracking terminated (user interrupt)")
-    
+
 telescope.shutdown()
 print('Shutdown')
