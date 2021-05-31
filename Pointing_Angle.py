@@ -1,8 +1,5 @@
 import numpy as np
 from astropy.time import Time
-from datetime import datetime
-from datetime import date
-from datetime import time
 from astropy import coordinates as coord
 #Make sure all of the inputs are in (decimal) degrees, not hours.
 def getAltAz(RA,DEC,LAT,LON,LST):

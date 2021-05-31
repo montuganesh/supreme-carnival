@@ -26,7 +26,8 @@ class Telescope():
     gearRatio = 729 #?
     currentAngle = np.array([alt, az])
     
-    LAT, LON = None, None
+    # These have values for debugging purposes, otherwise None
+    LAT, LON = 37.45875324211982, -122.15032378715412
     gps = None
     
     def __init__(self, server_IP, server_port):
@@ -188,12 +189,12 @@ class Telescope():
     def getAzAngle():
         azAngle = Telescope.azEncoder.getAngle()
         #return azAngle
-        return 170
+        return Telescope.currentAngle[Telescope.az]
         
     def getAltAngle():
         altAngle = Telescope.altEncoder.getAngle()
         #return altAngle
-        return 50
+        return Telescope.currentAngle[Telescope.alt]
     
     def getLAT():
         return Telescope.LAT
