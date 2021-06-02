@@ -9,7 +9,7 @@ import pigpio
 from datetime import datetime
 
 # import set_system_time
-    
+
 class Telescope():
 
     # Class variables, these are static variables just in case multiple instances of Telescope are created
@@ -24,7 +24,8 @@ class Telescope():
     alt = 0
     az = 1
     gearRatio = 729 #?
-    currentAngle = np.array([alt, az])
+    currentAngle = np.array([0.0, 0.0])
+    calibrationAngle = np.array([0.0, 0.0])
     
     # These have values for debugging purposes, otherwise None
     LAT, LON = 37.45875324211982, -122.15032378715412
@@ -39,6 +40,14 @@ class Telescope():
         initialAltAngle = Telescope.getAltAngle()
         initialAngle = np.array([initialAltAngle, initialAzAngle])
         Telescope.currentAngle = initialAngle
+        
+        caliFile = open('calibrationAngle.csv', 'r')
+        line = caliFile.readline().split(',')
+        altCali = line[0]
+        azCali = line[1]
+        Telescope.calibrationAngle = np.array([float(altCali),float(azCali)])
+        caliFile.close()
+        
 
     # Absolute target angle is passed in
     def target(self, angle):
@@ -57,16 +66,19 @@ class Telescope():
             try:
                 alt_actuation_angle = dAngle[Telescope.alt]*Telescope.gearRatio
                 az_actuation_angle = dAngle[Telescope.az]*Telescope.gearRatio
-                print(f"Alt: {alt_actuation_angle}")
-                print(f"Az: {az_actuation_angle}")
+                # print(f"Alt: {alt_actuation_angle}")
+                # print(f"Az: {az_actuation_angle}")
                 # Telescope.altMotor.actuate(alt_actuation_angle)
                 # Telescope.azMotor.actuate(az_actuation_angle)
                 newAngle = Telescope.currentAngle + dAngle
-                # Sleeps to let the encoders catch up
+                Telescope.curentAngle = newAngle
+                ''' 
+                Code for error correction (needs encoders for implementation)
                 time.sleep(0.2)
                 Telescope.currentAngle = Telescope.getAngles()
                 correction = newAngle - Telescope.currentAngle
                 self.correct(correction)
+                '''
                 
             except KeyboardInterrupt:
                 Telescope.altMotor.cancel()
@@ -130,11 +142,11 @@ class Telescope():
             
     def checkConstraints(self, dAngle):        
         # Limitations on single instance actuation
-        d_az_min, d_az_max = -180, 180      # We don't want to actuate more than hald a full rotation in one go -- thats just inefficient
+        d_az_min, d_az_max = -360, 360
         d_alt_min, d_alt_max = -90, 90
         
         # Limitations on absolute actuation
-        az_min, az_max = 0, 360             # Keep within one revolution to simplify the encoder's job
+        az_min, az_max = -360, 360          # Keep within one revolution to simplify the encoder's job
         alt_min, alt_max = 0, 90            # Spherical polar coordinates constraints (0 to 90 or 90 to 0?)
         
         d_alt = dAngle[Telescope.alt]
@@ -206,5 +218,7 @@ class Telescope():
         return Telescope.gearRatio
     
     def shutdown(self):
+        # Until proper storing of angle is sorted out, telescope will reset to 0,0 on shutdown 
+        self.target([0,0])
         Telescope.pi.stop()
-        sys.exit(0)
+        # sys.exit(0)

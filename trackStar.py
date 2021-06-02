@@ -21,7 +21,6 @@ while True:
         print("Input name could not be resolved")
         name = input("Please try again: ")
 
-# Using datetime.now as a placeholder
 trackParams = {
     'bodyName': name,
     'LAT': Telescope.getLAT,
@@ -29,8 +28,13 @@ trackParams = {
     'currentTimeDt': Telescope.getCurrentTime,
     'currentAngle': Telescope.getAngles
     }
+try:
+    trackTime = float(input("How long would you like to track for (seconds, 0 for infinite track)? "))
+except ValueError:
+    trackTime = 0
 
-trackTime = float(input("How long would you like to track for (seconds)? "))
+if trackTime == 0:
+    trackTime = None
 
 terminateType = telescope.activeTrack(angleFunc, 5, trackTime, **trackParams)
 

@@ -17,9 +17,6 @@ def getAltAz(RA,DEC,LAT,LON,LST):
     ALT = np.degrees(np.arcsin(A))
     #Final Altitude
     B = np.degrees(np.arccos((np.sin(np.radians(DEC))-np.sin(np.radians(ALT))*np.sin(np.radians(LAT)))/(np.cos(np.radians(ALT))*np.cos(np.radians(LAT)))))
-    print(B)
-    print(np.sin(np.radians(HA)))
-    print(HA)
     AZ = 0
     if np.sin(np.radians(HA)) < 0:
         AZ = B
@@ -94,5 +91,6 @@ def calcAngle(name,LAT,LON,dt,tALT,tAZ):
     NOW = getTime(dt)
     LST = getLST(J2000,LON,NOW)
     ALT,AZ = getAltAz(RA,DEC,LAT,LON,LST)
+    # print(f"Alt: {ALT}, Az: {AZ}")
     diff = getAngleDiff(ALT,AZ,tALT,tAZ)
     return diff
