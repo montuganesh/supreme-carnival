@@ -68,8 +68,8 @@ class Telescope():
                 az_actuation_angle = dAngle[Telescope.az]*Telescope.gearRatio
                 # print(f"Alt: {alt_actuation_angle}")
                 # print(f"Az: {az_actuation_angle}")
-                # Telescope.altMotor.actuate(alt_actuation_angle)
-                # Telescope.azMotor.actuate(az_actuation_angle)
+                Telescope.altMotor.actuate(alt_actuation_angle)
+                Telescope.azMotor.actuate(az_actuation_angle)
                 newAngle = Telescope.currentAngle + dAngle
                 Telescope.curentAngle = newAngle
                 ''' 
@@ -83,6 +83,7 @@ class Telescope():
             except KeyboardInterrupt:
                 Telescope.altMotor.cancel()
                 Telescope.azMotor.cancel()
+                pass
         else:
             print("Target angle outside of physical constraints... \nCommand was aborted")
             
