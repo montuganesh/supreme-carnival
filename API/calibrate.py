@@ -1,6 +1,6 @@
-# import subprocess
-# init_pigpio = ["sudo", "pigpiod", "-t0"]
-# subprocess.Popen(init_pigpio, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
+import subprocess
+init_pigpio = ["sudo", "pigpiod", "-t0"]
+subprocess.Popen(init_pigpio, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
 
 import numpy as np
 from Telescope import Telescope
