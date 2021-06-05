@@ -86,8 +86,8 @@ The blue lines indicate wires that carry the PWM signal from the RPi to the cont
 
 ### Raw Images
 More images are available <a href="https://github.com/cbrahana/supreme-carnival/blob/main/images">here</a>, but here are some of the best ones.
-<img src="https://github.com/cbrahana/supreme-carnival/blob/main/images/Raw1.jpg">
-<img src="https://github.com/cbrahana/supreme-carnival/blob/main/images/Raw2.jpg">
+<img src="https://github.com/cbrahana/supreme-carnival/blob/main/images/Raw1.JPG">
+<img src="https://github.com/cbrahana/supreme-carnival/blob/main/images/Raw2.JPG">
 
 ### Z-Scaled Images
 (Include a brief explanation of what z-scaling is, before the images)
