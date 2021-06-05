@@ -1,6 +1,6 @@
 # Automatic Telesocpe Control
 Welcome to the project page of the automatic pointing telescope. The goal of this project was to design, build, and program a mounting system for a telescope that is free to rotate in all directions without the need for the user to physically interact with the telescope. Such a system is more accurate, less finicky, and able to view the night sky remotely, without constant user monitoring. This project required us to design the hardware necessary for a maneuverable yet precise mounting system, the electronics necesary to rotate a 5 kg telescope and mounting system with about 30 arseconds of precision, as well as the software which controls the motors, calculation of required pointing angle, and the telescope as a whole.
-![Final Design](https://github.com/cbrahana/supreme-carnival/blob/main/images/Telescope_Setup.png)
+![Final Design](https://github.com/cbrahana/supreme-carnival/blob/main/images/Telescope_Setup.jpg)
 
 ## Table of Contents
 - [Components and Budget](#components-and-budget)
