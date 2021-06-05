@@ -1,5 +1,6 @@
 # Automatic Telesocpe Control
 Welcome to the project page of the automatic pointing telescope. The goal of this project was to design, build, and program a mounting system for a telescope that is free to rotate in all directions without the need for the user to physically interact with the telescope. Such a system is more accurate, less finicky, and able to view the night sky remotely, without constant user monitoring. This project required us to design the hardware necessary for a maneuverable yet precise mounting system, the electronics necesary to rotate a 5 kg telescope and mounting system with about 30 arseconds of precision, as well as the software which controls the motors, calculation of required pointing angle, and the telescope as a whole.
+![Final Design](https://github.com/cbrahana/supreme-carnival/blob/main/images/Telescope_Setup.png)
 
 ## Table of Contents
 - [Components and Budget](#components-and-budget)
@@ -58,8 +59,11 @@ We did not have time to fully implement encoders, although much of the functiona
 ### Mounting System
 
 ### Electronics
+To control the telescope, we needed extremely precisce yet powerful rotary motors &mdash not necessarily fast motors. We settled on the use of stepper motors, which are ideal for these circumstances: they are not as fast as other types of motors, but the notion of discrete 'steps' means that the motor torque and precision were exactly what we need. To power the NEMA 23 motors we selected, however, required the purchase of two dedicated controllers, which could convert the logic signals from the RPi to 24V and up to 4A signals to the motors themselves. We settled on the DM542 controllers since we did not care about high microstepping fidelity (as microstepping decreases torque) and it met the requirements of our motors. The ALITOVE power supplywas simply chosen because it was the cheapest available which could provide 24VDC power at up to 5A for each motor simultaneously. The choice of RPi was unimportant, in fact, we used many different RPis throughout the project. However, since the RPi only supplies 3.3V on its digital GPIO pins, and the controllers needed at least 3.5V to interpret the signals, we had to purchase a level converter, which would amplify the digital signals coming from the RPi so that they could be read by the controllers. We had attempted a solution involving a non-inverting amplifier using an op-amp, but this had issues at high frequencies, so we purchased dedicated logic converters which doubled the maximum rotation speed of the motors.
 
 #### Circuit Diagram
+The blue lines indicate wires that carry the PWM signal from the RPi to the controllers. Each pulse in the PWM signal is an instruction to step the motor once, so it was important that the PWM signal work at high frequencies so the motor would rotate fast, considering we were already stepping down the motor speed by a factor of 729. The green lines indicate wires which carry the binary direction signal to the controllers so that we could rotate the motors in either direction. 
+
 ![Circuit Diagram](https://github.com/cbrahana/supreme-carnival/blob/main/images/Electronics_Schematic.png)
 
 ## Code
@@ -88,4 +92,4 @@ We did not have time to fully implement encoders, although much of the functiona
 ## Conclusion 
 
 ## Contributors and Acknowldegements
-This porject was made for the spring 2021 UCSB physics 15C/13CH lab class by (in alphabetical order by last name) Collin Brahana, Sam Crossley, Montu Ganesh, and Jack Grossman, under the observation of Dr. Andrew Jayich, and TAs Sean Buechele and Mingyu Fan.
+This project was made for the spring 2021 UCSB physics 15C/13CH lab class by (in alphabetical order by last name) Collin Brahana, Sam Crossley, Montu Ganesh, and Jack Grossman, under the observation of Dr. Andrew Jayich, and TAs Sean Buechele and Mingyu Fan.
