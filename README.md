@@ -60,7 +60,7 @@ We did not have time to fully implement encoders, although much of the functiona
 ### Electronics
 
 #### Circuit Diagram
-![Circuit Diagram](/images/Elecronics_Shematic.png)
+![Circuit Diagram](https://supreme-carnival.github.com/images/Elecronics_Shematic.png)
 
 ## Code
 
