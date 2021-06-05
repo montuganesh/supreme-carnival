@@ -1,6 +1,6 @@
-import subprocess
-init_pigpio = ["sudo", "pigpiod", "-t0"]
-subprocess.Popen(init_pigpio, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
+# import subprocess
+# init_pigpio = ["sudo", "pigpiod", "-t0"]
+# subprocess.Popen(init_pigpio, stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
 
 import numpy as np
 from Telescope import Telescope
@@ -31,9 +31,10 @@ while True:
         print("Input name could not be resolved")
         name = input("Please try again: ")
         
-print("Actuating to assumed position...")
-t.actuate(angle)
-print("Completed. Now we begin the calibration, you will be prompted for two fields, the azimuthal and altitudinal angle you want to calibrate by (positive or negative numbers correspond to different directions).")
+# print("Actuating to assumed position...")
+# t.actuate(angle)
+# print("Completed")
+print("Now we begin the calibration, you will be prompted for two fields, the azimuthal and altitudinal angle you want to calibrate by (positive or negative numbers correspond to different directions).")
 print(f"You will continue to be prompted by these until you enter 0 into both fields, at this point, the telescope should be pointing directly at the body {name}")
 print("Beginning calibration...")
 
@@ -54,8 +55,8 @@ while True:
     except:
         print("Error, please enter again")
 
-Telescope.calibrationAngle = calibrationAngle
-Telescope.currentAngle -= calibrationAngle
+Telescope.calibrationAngle = calibrationAngle - angle
+Telescope.currentAngle -= Telescope.calibrationAngle
 # This is a terrible calibration technique so far. Should need to be run every time the telescope is restarted
 
 file = open('calibrationAngle.csv', 'w')
