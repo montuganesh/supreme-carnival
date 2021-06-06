@@ -80,7 +80,7 @@ The blue lines indicate wires that carry the PWM signal from the RPi to the cont
 
 #### Calibration
 
-## Project Flow (Who did what and when? - intended to chronicle the journey, idk if you guys want this or not)
+## Project Workflow (Who did what and when? - intended to chronicle the journey, idk if you guys want this or not)
 
 ## Results
 (What we accomplished, as well as what we didn't manage to accomplish)
