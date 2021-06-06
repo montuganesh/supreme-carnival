@@ -67,12 +67,18 @@ The blue lines indicate wires that carry the PWM signal from the RPi to the cont
 <img src="https://github.com/cbrahana/supreme-carnival/blob/main/images/Electronics_Schematic.png">
 
 ## Code
+In order to facilitate the remote work environment of this project, it was necessary to make the software as user-friendly and modular as possible such that the integration of various parts went smoothly. Since this was almost a necessity anyway, one of our goals was to provide a highly modular and extensible yet user-friendly software to control the telescope. We will go into detail about the main elements pieces of our software below, each being largely independent of the others to allow for this modularity, yet all working together to provide telescope functionality.
 
 ### Pointing Angle Calculation
 
 #### Star Database
 
 ### Motor Control
+We wanted the motor control to be entirely self-contained, which makes it easier to debug code if the motors fail to run and allows for more freedom when it comes to pointing the telescope. The code uses the pigpio library, which is a 3rd party python library for Raspberry Pi which gives us control of key features of the Pi's hardware, such as its internal, hardware PWM clock. It is important that we use this hardware clock as opposed to the more common software PWM, since python is notoriously bad at handling precision time measurements, which would result in erratic and unreliable PWM signals. The hardware clock, on the other hand, is extremely precise to within about a 1 microsecond. This means that we could very precisiely control the amount of PWM signals outputted and, as each pulse is an instruction to step the motor once, this is crucial for precision control. The hardware clock does, however, come with the limitation that it can only operate at a few discrete frequencies, so we cannot continuously accelerate the motors as we sould if using a software clock. The motor control therefore includes the aility to automatically generate the necessary acceleration curve, given the maximum acceleration, maximum speed, and list of available clock frequencies provided by the user. One example of the generated acceleration curve is shown below, the acceleration is linear, then peaks and holds that maximum speed, then it decreases linearly (or as linearly as possible given the available speeds).
+
+<img src="https://github.com/cbrahana/supreme-carnival/blob/main/images/Accel_Curve_10_Revs.png" width=500><img src="https://github.com/cbrahana/supreme-carnival/blob/main/images/Accel_Curve_100_Revs.png" width=500>
+
+The maximum speed, maximum acceleration, and the available frequencies for each motor are all mutable by the user, providing them control of the telescope not achievable by many commercial equivalents. One major limitation of the motor software design is that multiple motors cannot be actuated simultaneously. This is a limitation of the the pigpio library which could easily be fixed by purchasing an external clock or (painstakingly) fixed in software. Due to time contraints, none of these fixes were implemented here.
 
 ### Telescope Control
 
