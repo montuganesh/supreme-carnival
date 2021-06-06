@@ -25,6 +25,7 @@ Welcome to the project page of the automatic pointing telescope. The goal of thi
 
 ## Components and Budget
 These are the electrical and mechanical parts that we used for this design. Many of the electrical parts could be substituted for parts with comparable specifications, but these are the ones we used for this design. All parts were purchased from Amazon.
+
 \# | Part | Subtotal ($)
 ---------|------|------
 1 | ALITOVE 110VAC to 24VDC 10A Power Supply | 20.99
@@ -34,14 +35,21 @@ These are the electrical and mechanical parts that we used for this design. Many
 1 | MH Level Converter | ~0.60
 1 | Nexstar 127 SLT Telescope* | —
 4 | Worm Gear Set 27:1 | 86.96
+10| 1/4-inch Thrust Bearings |32.54
+3 | 1/4-inch D-shaft, 12 in | 15.16
 
-Collin, do the mechanical parts and cost we ended up using. 
+Also used, from available resources:
+~$20 PLA Printer Filament
+~$2 assorted nuts, bolts
+~$5 hollow curtain rod
+
+Total Construction Cost, not counting unbilled resources: $260.23
 
 \* Optical part of the telescope only
 
 — Part was on hand, no purchase necessary
 
-The total cost of the electrical components we used (including shipping) came out to about $230. Including a basic Raspberry Pi and the necessary mechanical parts, this total cost of this porject comes out to just under $300. For comparison, many similar commercial telescopes with these capabilities sell closer to the $500-$1500 range, though they also usually also include the optical part of the telescope itself.
+The total cost of the electrical components we used (including shipping) came out to about $260. Including a basic Raspberry Pi and the necessary mechanical parts, this total cost of this project comes out to $300.21 . For comparison, many similar commercial telescopes with these capabilities sell closer to the $500-$1500 range, though they also usually also include the optical part of the telescope itself.
 
 ### Extra Parts
 In the interest of full disclosure, we list here the parts that we bought but did not end up using, and the parts that we bought to facilitate remote work on this project (such as multiple Raspberry Pis so that each of us could test code on them individually)
@@ -54,9 +62,12 @@ In the interest of full disclosure, we list here the parts that we bought but di
 
 We did not have time to fully implement encoders, although much of the functionality for controlling the telescope using encoders exists within the code.
 
-## Design
+### Gearbox
+We decided to use stepper motors to actuate the telescope, because they are widely available. This meant that we needed a gearbox with a sufficinetly high reduction ratio, low backlash, no backdriving, and low cost. There were no COTS systems that did this, so we designed our own. We chose worm gears as the internal reduction mechanism, because they had low backlash, could not be backdriven, and could do better than the required 400:1 reduction ratio with only two gearing stages. A gearbox housing was designed to mount motors and hold shafts, and the gears were mounted in this housing with the assistance of several 3D-printed spacers. The design is demonstrated in the CAD files, and specifically in A001(long), where several unprintable parts were redesigned. Lengths of shaft were left free, and custom mounting brackets were created to fit over the free shaft and glued in place. While this made the system difficult to redesign, it also made for a stable, effective telescope mounting system.
 
 ### Mounting System
+In order to attach the gearbox subassembly to the ground, we decided to use a monopod, which had the advantage of causing no issues between a colliding telescope and a tripod leg. The exposed azimuthal shaft from the gearbox subassembly was placed into a mounting device which had been printed for the occasion. This technique was successful, but difficult to set up - the monopod was not suitably supported by the soil it was burried in relative to the cantilevered mass of the telescope, and so a system of clamps had to be devised. This system of clamps made retargeting difficult, but not impossible, and acheived satisfactory stability.
+
 
 ### Electronics
 To control the telescope, we needed extremely precisce yet powerful rotary motors—not necessarily fast motors. We settled on the use of stepper motors, which are ideal for these circumstances: they are not as fast as other types of motors, but the notion of discrete 'steps' means that the motor torque and precision were exactly what we need. To power the NEMA 23 motors we selected, however, required the purchase of two dedicated controllers, which could convert the logic signals from the RPi to 24V and up to 4A signals to the motors themselves. We settled on the DM542 controllers since we did not care about high microstepping fidelity (as microstepping decreases torque) and it met the requirements of our motors. The ALITOVE power supplywas simply chosen because it was the cheapest available which could provide 24VDC power at up to 5A for each motor simultaneously. The choice of RPi was unimportant, in fact, we used many different RPis throughout the project. However, since the RPi only supplies 3.3V on its digital GPIO pins, and the controllers needed at least 3.5V to interpret the signals, we had to purchase a level converter, which would amplify the digital signals coming from the RPi so that they could be read by the controllers. We had attempted a solution involving a non-inverting amplifier using an op-amp, but this had issues at high frequencies, so we purchased dedicated logic converters which doubled the maximum rotation speed of the motors.
